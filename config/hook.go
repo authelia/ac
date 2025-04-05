@@ -25,7 +25,7 @@ func mStringToURLHookFunc() mapstructure.DecodeHookFuncType {
 			prefixType = "*"
 		}
 
-		expectedType := reflect.TypeOf(url.URL{})
+		expectedType := reflect.TypeOf(URL{})
 
 		if ptr && t.Elem() != expectedType {
 			return data, nil
@@ -44,14 +44,14 @@ func mStringToURLHookFunc() mapstructure.DecodeHookFuncType {
 		}
 
 		if ptr {
-			return result, nil
+			return (*URL)(result), nil
 		}
 
 		if result == nil {
-			return url.URL{}, nil
+			return URL{}, nil
 		}
 
-		return *result, nil
+		return (URL)(*result), nil
 	}
 }
 

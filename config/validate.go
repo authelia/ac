@@ -18,7 +18,31 @@ func (config *Configuration) Validate() (err error) {
 	return nil
 }
 
-func (config *OAuth2Bearer) Validate() (err error) {
+func (config *OAuth2) Validate() (err error) {
+	if err = config.Clients.Validate(); err != nil {
+		return err
+	}
+
+	if config.DefaultClient != "" {
+		if _, ok := config.Clients[config.DefaultClient]; !ok {
+			return fmt.Errorf("error validating configuration: the default client '%s' does not exist", config.DefaultClient)
+		}
+	}
+	
+	return nil
+}
+
+func (config OAuth2Clients) Validate() (err error) {
+	for name, client := range config {
+		if err = client.Validate(); err != nil {
+			return fmt.Errorf("error validating configuration: oauth2: clients: %s: %v", name, err)
+		}
+	}
+
+	return nil
+}
+
+func (config *OAuth2Client) Validate() (err error) {
 	if len(config.ID) == 0 {
 		return fmt.Errorf(errFmtRequiredOptionOAuth2Bearer, consts.ID)
 	}

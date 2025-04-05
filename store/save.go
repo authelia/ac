@@ -5,23 +5,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/pelletier/go-toml"
-	"gopkg.in/yaml.v3"
+	"authelia.com/tools/ac/utilities"
 )
 
 func (s *Storage) Save(path string) (err error) {
 	var data []byte
 
-	switch ext := filepath.Ext(path); ext {
-	case ".yml", ".yaml":
-		data, err = yaml.Marshal(s)
-	case ".tml", ".toml":
-		data, err = toml.Marshal(s)
-	default:
-		err = fmt.Errorf("extension '%s' for file '%s' is not supported", ext, path)
-	}
-
-	if err != nil {
+	if data, err = utilities.AutoMarshal(s, filepath.Ext(path)); err != nil {
 		return fmt.Errorf("error occurred marshalling the updated storage: %w", err)
 	}
 

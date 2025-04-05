@@ -20,5 +20,13 @@ const (
 	ClientSecretPost        = "client_secret_post"
 	ClientSecretBasic       = "client_secret_basic"
 
-	OAuth2Bearer = "oauth2.bearer"
+	OAuth2 = "oauth2"
+)
+
+const (
+	FileTypeYAML    = ".yaml"
+	FileTypeJSON    = ".json"
+	FileTypeTOML    = ".toml"
+	FileTypeAltYAML = ".yml"
+	FileTypeAltTOML = ".tml"
 )
