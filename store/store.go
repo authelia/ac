@@ -1,4 +1,4 @@
-package main
+package store
 
 import (
 	"fmt"
@@ -7,9 +7,11 @@ import (
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
+
+	"authelia.com/tools/ac/config"
 )
 
-func loadStorage(path string) (store *Store, err error) {
+func Load(path string) (store *Storage, err error) {
 	var stat os.FileInfo
 
 	if stat, err = os.Stat(path); err != nil {
@@ -38,11 +40,11 @@ func loadStorage(path string) (store *Store, err error) {
 		return nil, fmt.Errorf("error occurred loading file storage: %w", err)
 	}
 
-	store = &Store{
-		Tokens: map[string]TokenStore{},
+	store = &Storage{
+		Tokens: map[string]Token{},
 	}
 
-	if err = koUnmarshal(ko, store); err != nil {
+	if err = config.Unmarshal(ko, store); err != nil {
 		return nil, fmt.Errorf("error occurred unmarshalling storage: %w", err)
 	}
 
