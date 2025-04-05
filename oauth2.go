@@ -29,7 +29,9 @@ func newOAuth2Cmd(ctx *cmdctx) (cmd *cobra.Command) {
 
 	cmd.AddCommand(
 		newOAuth2ClientCmd(ctx),
-		newOAuth2BearerCmd(ctx),
+		newOAuth2RequestCmd(ctx),
+		newOAuth2RefreshCmd(ctx),
+		newOAuth2RevokeCmd(ctx),
 	)
 
 	return cmd
@@ -184,7 +186,7 @@ func (ctx *cmdctx) handleOAuth2ClientDefaultRunE(cmd *cobra.Command, args []stri
 	return ctx.config.Save(pathOut)
 }
 
-func newOAuth2BearerCmd(ctx *cmdctx) (cmd *cobra.Command) {
+func newOAuth2RequestCmd(ctx *cmdctx) (cmd *cobra.Command) {
 	cmd = &cobra.Command{
 		Use:     "request [name]",
 		Short:   "Request a bearer token via OAuth 2.0",
@@ -192,15 +194,6 @@ func newOAuth2BearerCmd(ctx *cmdctx) (cmd *cobra.Command) {
 		RunE:    ctx.handleOAuth2RequestRunE,
 		Args:    cobra.MaximumNArgs(1),
 	}
-
-	cmd.Flags().String(consts.ID, "", "The client id")
-	cmd.Flags().String(consts.Secret, "", "The client secret")
-	cmd.Flags().String("grant-type", consts.AuthorizationCode, "The grant type to use which dictates the flow, options are 'authorization_code', 'client_credentials', or 'refresh_token'")
-	cmd.Flags().StringSlice(consts.Scope, nil, "The scopes to request")
-	cmd.Flags().StringSlice(consts.Audience, nil, "The audience to request")
-	cmd.Flags().Bool("offline-access", false, "In addition to the scopes automatically includes the scope required for a Refresh Token for the Authorization Code FLow")
-	cmd.Flags().String("token-endpoint-auth-method", consts.ClientSecretPost, "The authentication method for the token endpoint, options are 'none', 'client_secret_post', and 'client_secret_basic'")
-	cmd.Flags().Bool("par", false, "Perform RFC916 Pushed Authorization Requests for the Authorization Code Flow")
 
 	return cmd
 }
@@ -221,22 +214,22 @@ func (ctx *cmdctx) handleOAuth2RequestRunE(cmd *cobra.Command, args []string) (e
 	client, ok := ctx.config.OAuth2.Clients[name]
 
 	if !ok {
-		return fmt.Errorf("no oauth2 client '%s' exists", name)
+		return fmt.Errorf("no oauth2 client '%s' doesn't exist", name)
 	}
 
 	switch client.GrantType {
 	case consts.AuthorizationCode:
-		return ctx.handleOAuth2BearerAuthorizationCodeFlowRunE(name, client)
+		return ctx.handleOAuth2BearerAuthorizationCodeFlowSubRunE(name, client)
 	case consts.ClientCredentials:
-		return ctx.handleOAuth2BearerClientCredentialsFlowRunE(name, client)
+		return ctx.handleOAuth2BearerClientCredentialsFlowSubRunE(name, client)
 	case consts.RefreshToken:
-		return ctx.handleOAuth2BearerRefreshTokenFlowRunE(name, client)
+		return ctx.handleOAuth2BearerRefreshTokenFlowSubRunE(name, client)
 	default:
 		return fmt.Errorf("error occurred performing flow: uknonwn grant type '%s'", client.GrantType)
 	}
 }
 
-func (ctx *cmdctx) handleOAuth2BearerAuthorizationCodeFlowRunE(name string, client config.OAuth2Client) (err error) {
+func (ctx *cmdctx) handleOAuth2BearerAuthorizationCodeFlowSubRunE(name string, client config.OAuth2Client) (err error) {
 	state, err := utilities.GetRandomBytes(100, utilities.CharsetRFC3986Unreserved)
 	if err != nil {
 		return fmt.Errorf("error occurred generating state value: %w", err)
@@ -282,7 +275,7 @@ func (ctx *cmdctx) handleOAuth2BearerAuthorizationCodeFlowRunE(name string, clie
 	return ctx.handleTokenRetrieved(name, client)(config.Exchange(ctx, r.FormValue(consts.Code), pkce.AuthCodeOptionVerifier()))
 }
 
-func (ctx *cmdctx) handleOAuth2BearerClientCredentialsFlowRunE(name string, client config.OAuth2Client) (err error) {
+func (ctx *cmdctx) handleOAuth2BearerClientCredentialsFlowSubRunE(name string, client config.OAuth2Client) (err error) {
 	params := url.Values{}
 
 	params.Set(consts.Audience, strings.Join(client.Audience, " "))
@@ -300,7 +293,105 @@ func (ctx *cmdctx) handleOAuth2BearerClientCredentialsFlowRunE(name string, clie
 	return ctx.handleTokenRetrieved(name, client)(config.Token(ctx))
 }
 
-func (ctx *cmdctx) handleOAuth2BearerRefreshTokenFlowRunE(name string, client config.OAuth2Client) (err error) {
+func newOAuth2RefreshCmd(ctx *cmdctx) (cmd *cobra.Command) {
+	cmd = &cobra.Command{
+		Use:     "refresh [name]",
+		Short:   "Refresh a bearer token via OAuth 2.0",
+		PreRunE: ctx.handleLoadConfigPreRunE(consts.OAuth2),
+		RunE:    ctx.handleOAuth2RefreshRunE,
+		Args:    cobra.MaximumNArgs(1),
+	}
+
+	return cmd
+}
+
+func (ctx *cmdctx) handleOAuth2RefreshRunE(cmd *cobra.Command, args []string) (err error) {
+	var name string
+
+	if len(args) != 0 {
+		name = args[0]
+	} else {
+		name = ctx.config.OAuth2.DefaultClient
+	}
+
+	if len(name) == 0 {
+		return fmt.Errorf("no oauth2 client specified")
+	}
+
+	client, ok := ctx.config.OAuth2.Clients[name]
+
+	if !ok {
+		return fmt.Errorf("no oauth2 client '%s' doesn't exist", name)
+	}
+
+	return ctx.handleOAuth2BearerRefreshTokenFlowSubRunE(name, client)
+}
+
+func newOAuth2RevokeCmd(ctx *cmdctx) (cmd *cobra.Command) {
+	cmd = &cobra.Command{
+		Use:     "revoke [name]",
+		Short:   "Revoke a bearer token via OAuth 2.0",
+		PreRunE: ctx.handleLoadConfigPreRunE(consts.OAuth2),
+		RunE:    ctx.handleOAuth2RevokeRunE,
+		Args:    cobra.MaximumNArgs(1),
+	}
+
+	return cmd
+}
+
+func (ctx *cmdctx) handleOAuth2RevokeRunE(cmd *cobra.Command, args []string) (err error) {
+	var name string
+
+	if len(args) != 0 {
+		name = args[0]
+	} else {
+		name = ctx.config.OAuth2.DefaultClient
+	}
+
+	if len(name) == 0 {
+		return fmt.Errorf("no oauth2 client specified")
+	}
+
+	client, ok := ctx.config.OAuth2.Clients[name]
+
+	if !ok {
+		return fmt.Errorf("no oauth2 client '%s' doesn't exist", name)
+	}
+
+	var (
+		token store.Token
+	)
+
+	if token, ok = ctx.storage.Tokens[name]; !ok || (len(token.RefreshToken) == 0 && len(token.AccessToken) == 0) {
+		return fmt.Errorf("The Revoke Token Flow requires a stored token for the client but none was found.")
+	}
+
+	config := handleGetConfig(ctx.config, client)
+
+	var opts []oauth2.RevocationOption
+
+	t := &oauth2.Token{
+		AccessToken:  token.AccessToken,
+		TokenType:    token.TokenType,
+		Expiry:       token.Expiry,
+		RefreshToken: token.RefreshToken,
+		IDToken:      token.IDToken,
+	}
+
+	if err = config.RevokeToken(ctx, t, opts...); err != nil {
+		return err
+	}
+
+	delete(ctx.storage.Tokens, name)
+
+	if err = ctx.storage.Save(ctx.config.Storage); err != nil {
+		return fmt.Errorf("error occurred saving updated tokens: %w", err)
+	}
+
+	return nil
+}
+
+func (ctx *cmdctx) handleOAuth2BearerRefreshTokenFlowSubRunE(name string, client config.OAuth2Client) (err error) {
 	var (
 		token store.Token
 		ok    bool
@@ -347,7 +438,7 @@ func (ctx *cmdctx) handleTokenRetrieved(name string, client config.OAuth2Client)
 		tokenstore := store.Token{
 			AccessToken:  token.AccessToken,
 			RefreshToken: token.RefreshToken,
-			IDToken:      handleTokenGetString("id_token", token),
+			IDToken:      token.IDToken,
 			TokenType:    token.Type(),
 			Scope:        handleTokenGetString(consts.Scope, token),
 			Expiry:       token.Expiry,
