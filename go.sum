@@ -1,5 +1,5 @@
-authelia.com/client/oauth2 v0.0.0-20250405005328-fd752214e408 h1:BPZsJzlRlgK7MakzWBRZGuZg6Y9NQZu0vzrSZf9fjNc=
-authelia.com/client/oauth2 v0.0.0-20250405005328-fd752214e408/go.mod h1:f0e/AQgp3qHJ2gSVnCheQZ4gTCm7BHasGpWrce36n9Q=
+authelia.com/client/oauth2 v0.0.0-20250405043315-6378a9b2a190 h1:5YfShMnyeIOFX5C1I7i6YrEpIfQCeeDBFTjau/iLfVU=
+authelia.com/client/oauth2 v0.0.0-20250405043315-6378a9b2a190/go.mod h1:f0e/AQgp3qHJ2gSVnCheQZ4gTCm7BHasGpWrce36n9Q=
 github.com/cpuguy83/go-md2man/v2 v2.0.6/go.mod h1:oOW0eioCTA6cOiMLiUPZOpcVxMig6NIQQ7OS05n1F4g=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

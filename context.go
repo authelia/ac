@@ -1,13 +1,13 @@
 package main
 
 import (
-	"authelia.com/tools/ac/store"
 	"context"
 
 	"github.com/spf13/cobra"
 
 	"authelia.com/tools/ac/config"
 	"authelia.com/tools/ac/consts"
+	"authelia.com/tools/ac/store"
 )
 
 type cmdctx struct {
@@ -36,8 +36,8 @@ func (ctx *cmdctx) handleLoadConfigPreRunE(prefix string) func(cmd *cobra.Comman
 		}
 
 		switch prefix {
-		case consts.OAuth2Bearer:
-			if err = ctx.config.OAuth2.Bearer.Validate(); err != nil {
+		case consts.OAuth2:
+			if err = ctx.config.OAuth2.Validate(); err != nil {
 				return err
 			}
 		}

@@ -1,11 +1,11 @@
-package main
+package utilities
 
 import (
 	"crypto/rand"
 	"fmt"
 )
 
-func getRandomBytes(n int, charset []byte) (data []byte, err error) {
+func GetRandomBytes(n int, charset []byte) (data []byte, err error) {
 	data = make([]byte, n)
 
 	if _, err = rand.Read(data); err != nil {
@@ -24,5 +24,6 @@ func getRandomBytes(n int, charset []byte) (data []byte, err error) {
 }
 
 var (
-	charsetRFC3986Unreserved = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~")
+	CharsetRFC3986Unreserved = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~")
+	CharsetAlphaNumeric      = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 )

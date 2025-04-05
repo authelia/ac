@@ -11,8 +11,11 @@ import (
 	"github.com/knadh/koanf/providers/posflag"
 	"github.com/knadh/koanf/v2"
 	"github.com/spf13/pflag"
+
+	"authelia.com/tools/ac/consts"
 )
 
+// Load the configuration.
 func Load(paths []string, flags *pflag.FlagSet, flagsPrefix string) (config *Configuration, err error) {
 	ko := koanf.New(".")
 
@@ -26,11 +29,11 @@ func Load(paths []string, flags *pflag.FlagSet, flagsPrefix string) (config *Con
 		provider := file.Provider(path)
 
 		switch ext := filepath.Ext(path); ext {
-		case ".yaml", ".yml", ".json":
+		case consts.FileTypeYAML, consts.FileTypeAltYAML, consts.FileTypeJSON:
 			if err = ko.Load(provider, yaml.Parser()); err != nil {
 				return nil, fmt.Errorf("error occurred loading file configuration: %w", err)
 			}
-		case ".tml", ".toml":
+		case consts.FileTypeTOML, consts.FileTypeAltTOML:
 			if err = ko.Load(provider, toml.Parser()); err != nil {
 				return nil, fmt.Errorf("error occurred loading file configuration: %w", err)
 			}
