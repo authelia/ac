@@ -116,7 +116,7 @@ func (ctx *cmdctx) handleOAuth2BearerClientCredentialsFlowRunE(cmd *cobra.Comman
 	config := &clientcredentials.Config{
 		ClientID:       ctx.config.OAuth2.Bearer.ID,
 		ClientSecret:   ctx.config.OAuth2.Bearer.Secret,
-		TokenURL:       endpoints.Authelia(ctx.config.AutheliaURL.String()).TokenURL,
+		TokenURL:       endpoints.Authelia(ctx.config.AutheliaURL).TokenURL,
 		Scopes:         ctx.config.OAuth2.Bearer.Scope,
 		EndpointParams: params,
 		AuthStyle:      oauth2.ClientSecretPost,
@@ -157,7 +157,7 @@ func handleGetConfig(config *Schema) *oauth2.Config {
 	return &oauth2.Config{
 		ClientID:     config.OAuth2.Bearer.ID,
 		ClientSecret: config.OAuth2.Bearer.Secret,
-		Endpoint:     endpoints.Authelia(config.AutheliaURL.String()),
+		Endpoint:     endpoints.Authelia(config.AutheliaURL),
 		RedirectURL:  "http://localhost:9019/callback",
 		Scopes:       config.OAuth2.Bearer.Scope,
 	}
