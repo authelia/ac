@@ -1,14 +1,14 @@
-package main
+package store
 
 import (
 	"time"
 )
 
-type Store struct {
-	Tokens map[string]TokenStore
+type Storage struct {
+	Tokens map[string]Token
 }
 
-type TokenStore struct {
+type Token struct {
 	AccessToken  string    `koanf:"access_token" yaml:"access_token" json:"access_token"`
 	RefreshToken string    `koanf:"refresh_token" yaml:"refresh_token,omitempty" json:"refresh_token,omitempty"`
 	IDToken      string    `koanf:"id_token" yaml:"id_token,omitempty" json:"id_token,omitempty"`

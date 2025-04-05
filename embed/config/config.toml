@@ -1,0 +1,15 @@
+authelia_url = "https://auth.example.com"
+storage = "storage.yml"
+
+[oauth2.bearer]
+id = "random_id"
+secret = "insecure_secret"
+par = true
+scope = [ "offline_access", "authelia.bearer.authz" ]
+audience = [ "https://app.example.com" ]
+grant_type = "authorization_code"
+token_endpoint_auth_method = "client_secret_post"
+offline_access = true
+
+[server]
+port = 9019

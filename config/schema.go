@@ -1,20 +1,25 @@
-package main
+package config
 
 import (
 	"net/url"
 )
 
-type Schema struct {
-	AutheliaURL *url.URL     `koanf:"authelia_url"`
-	Storage     string       `koanf:"storage"`
-	OAuth2      SchemaOAuth2 `koanf:"oauth2"`
+type Configuration struct {
+	AutheliaURL *url.URL `koanf:"authelia_url"`
+	Storage     string   `koanf:"storage"`
+	OAuth2      OAuth2   `koanf:"oauth2"`
+	Server      Server   `koanf:"server"`
 }
 
-type SchemaOAuth2 struct {
-	Bearer SchemaOAuth2Bearer `koanf:"bearer"`
+type Server struct {
+	Port uint16 `koanf:"port"`
 }
 
-type SchemaOAuth2Bearer struct {
+type OAuth2 struct {
+	Bearer OAuth2Bearer `koanf:"bearer"`
+}
+
+type OAuth2Bearer struct {
 	ID                      string   `koanf:"id"`
 	Secret                  string   `koanf:"secret"`
 	PAR                     bool     `koanf:"par"`

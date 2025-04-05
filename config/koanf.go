@@ -1,11 +1,11 @@
-package main
+package config
 
 import (
+	"github.com/go-viper/mapstructure/v2"
 	"github.com/knadh/koanf/v2"
-	"github.com/mitchellh/mapstructure"
 )
 
-func koUnmarshal(ko *koanf.Koanf, data any) (err error) {
+func Unmarshal(ko *koanf.Koanf, data any) (err error) {
 	c := koanf.UnmarshalConf{
 		DecoderConfig: &mapstructure.DecoderConfig{
 			DecodeHook: mapstructure.ComposeDecodeHookFunc(
